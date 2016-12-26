@@ -16,6 +16,12 @@
 
 package com.hazelcast.client.impl.protocol.task;
 
+import static java.util.Collections.EMPTY_MAP;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+
 import com.hazelcast.client.impl.protocol.ClientMessage;
 import com.hazelcast.core.Member;
 import com.hazelcast.instance.Node;
@@ -24,14 +30,8 @@ import com.hazelcast.spi.InvocationBuilder;
 import com.hazelcast.spi.Operation;
 import com.hazelcast.spi.impl.SimpleExecutionCallback;
 import com.hazelcast.spi.impl.operationservice.InternalOperationService;
+import com.hazelcast.util.MapUtil;
 import com.hazelcast.util.function.Supplier;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-import static java.util.Collections.EMPTY_MAP;
 
 public abstract class AbstractMultiTargetMessageTask<P> extends AbstractMessageTask<P> {
 
