@@ -135,7 +135,7 @@ public class ClientEngineImpl implements ClientEngine, CoreService, PostJoinAwar
     }
 
     private ClientExceptionFactory initClientExceptionFactory() {
-        boolean jcacheAvailable = JCacheDetector.isJcacheAvailable(nodeEngine.getConfigClassLoader());
+        boolean jcacheAvailable = JCacheDetector.isJCacheAvailable(nodeEngine.getConfigClassLoader());
         return new ClientExceptionFactory(jcacheAvailable);
     }
 
@@ -350,6 +350,11 @@ public class ClientEngineImpl implements ClientEngine, CoreService, PostJoinAwar
 
     public boolean removeOwnershipMapping(String clientUuid, String memberUuid) {
         return ownershipMappings.remove(clientUuid, memberUuid);
+    }
+
+    //implemented for test purpose
+    public String getOwnerUuid(String clientUuid) {
+        return ownershipMappings.get(clientUuid);
     }
 
     public TransactionManagerService getTransactionManagerService() {
