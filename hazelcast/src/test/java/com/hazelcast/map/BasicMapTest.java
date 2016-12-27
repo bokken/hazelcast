@@ -17,6 +17,8 @@
 package com.hazelcast.map;
 
 import com.hazelcast.config.Config;
+import com.hazelcast.config.InMemoryFormat;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.EntryAdapter;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
@@ -26,21 +28,28 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.core.MapEvent;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.test.AssertTask;
-import com.hazelcast.test.HazelcastParallelClassRunner;
+import com.hazelcast.test.HazelcastParametersRunnerFactory;
 import com.hazelcast.test.HazelcastTestSupport;
 import com.hazelcast.test.TestHazelcastInstanceFactory;
 import com.hazelcast.test.annotation.ParallelTest;
 import com.hazelcast.test.annotation.QuickTest;
 import com.hazelcast.util.Clock;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -57,24 +66,60 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@RunWith(HazelcastParallelClassRunner.class)
+@RunWith(Parameterized.class)
+@UseParametersRunnerFactory(HazelcastParametersRunnerFactory.class)
 @Category({QuickTest.class, ParallelTest.class})
 public class BasicMapTest extends HazelcastTestSupport {
-
+    
     private static final int INSTANCE_COUNT = 3;
     private static final Random RANDOM = new Random();
 
+    @Parameter(0)
+    public boolean defensiveCopy;
+    
+    @Parameter(1)
+    public boolean readFromBackups;
+    
     HazelcastInstance[] instances;
+    
+    @Parameters(name="Defensive copy: [{0}]  Read from backups: [{1}]")
+    public static Iterable<Object[]> parameters() {
+        final List<Object[]> params = new ArrayList<Object[]>(4);
+        
+        for (int i=0; i<2; ++i) {
+            for (int j=0; j<2; ++j) {
+                params.add(new Object[]{i==0, j==0});
+            }
+        }
+        
+        return params;
+    }
+    
 
     @Before
     public void init() {
         TestHazelcastInstanceFactory factory = createHazelcastInstanceFactory(INSTANCE_COUNT);
         Config config = getConfig();
+        final MapConfig mapConfig = config.getMapConfig("default");
+        if (!defensiveCopy)
+        {
+            mapConfig.setForceDefensiveCopy(false);
+            mapConfig.setInMemoryFormat(InMemoryFormat.OBJECT);
+        }
+        if (readFromBackups)
+        {
+            mapConfig.setAsyncBackupCount(0);
+            mapConfig.setBackupCount(1);
+            mapConfig.setReadBackupData(true);
+        }
         instances = factory.newInstances(config);
+        
     }
 
     HazelcastInstance getInstance() {
@@ -109,46 +154,78 @@ public class BasicMapTest extends HazelcastTestSupport {
         map.put(key, value);
         assertEquals(value, map.get(key));
     }
+    
+    private void assertValue(Map<String, Object> map, String key, AtomicBoolean sameValue)
+    {
+        final Object v1 = map.get(key);
+        if (defensiveCopy) {
+            if (sameValue != null) {
+                assertNotSame(map.get(key), v1);
+            }
+        } else {
+            if (map.get(key) == v1) {
+                sameValue.set(true);
+            }
+        }
+    }
 
     @Test
     public void testArrays() {
         IMap<String, Object> map = getInstance().getMap("testArrays");
 
+        final AtomicBoolean sameValues = new AtomicBoolean(false);
+        
         boolean[] booleanArray = {true, false};
         map.put("boolean", booleanArray);
-        assertTrue(Arrays.equals(booleanArray, (boolean[]) map.get("boolean")));
+        final boolean[] actualBools = (boolean[]) map.get("boolean");
+        assertTrue(Arrays.equals(booleanArray, actualBools));
+        assertValue(map, "boolean", sameValues);
 
         int[] intArray = {1, 2};
         map.put("int", intArray);
-        assertArrayEquals(intArray, (int[]) map.get("int"));
+        final int[] actualInts = (int[]) map.get("int");
+        assertArrayEquals(intArray, actualInts);
+        assertValue(map, "int", sameValues);
 
         short[] shortArray = {(short) 1, (short) 2};
         map.put("short", shortArray);
         assertArrayEquals(shortArray, (short[]) map.get("short"));
+        assertValue(map, "short", sameValues);
 
-        short[] byteArray = {(byte) 1, (byte) 2};
+        byte[] byteArray = {(byte) 1, (byte) 2};
         map.put("byte", byteArray);
-        assertArrayEquals(byteArray, (short[]) map.get("byte"));
+        assertArrayEquals(byteArray, (byte[]) map.get("byte"));
+        assertValue(map, "byte", sameValues);
 
         long[] longArray = {1L, 2L};
         map.put("long", longArray);
         assertArrayEquals(longArray, (long[]) map.get("long"));
+        assertValue(map, "long", sameValues);
 
         float[] floatArray = {(float) 1, (float) 2};
         map.put("float", floatArray);
         assertTrue(Arrays.equals(floatArray, (float[]) map.get("float")));
+        assertValue(map, "float", sameValues);
 
-        double[] doubleArray = {(double) 1, (double) 2};
+        double[] doubleArray = {(double) 1.2, (double) 2.3};
         map.put("double", doubleArray);
         assertTrue(Arrays.equals(doubleArray, (double[]) map.get("double")));
+        assertValue(map, "double", sameValues);
 
         char[] charArray = {'1', '2'};
         map.put("char", charArray);
         assertArrayEquals(charArray, (char[]) map.get("char"));
+        assertValue(map, "char", sameValues);
 
         Object[] objectArray = {"foo", null, Integer.decode("3")};
         map.put("object", objectArray);
         assertArrayEquals(objectArray, (Object[]) map.get("object"));
+        assertValue(map, "object", sameValues);
+        
+        //if not defensive copies, then at least one of the array instances should be identical
+        //if the value was not available locally, subsequent calls would not be identical,
+        //as each would result in fetching from another node
+        assertNotEquals(defensiveCopy, sameValues.get());
     }
 
     @Test
@@ -671,9 +748,17 @@ public class BasicMapTest extends HazelcastTestSupport {
         assertEquals((Integer) 22, entryView2.getValue());
         assertEquals((Integer) 3, entryView3.getValue());
 
-        assertEquals(2, entryView1.getHits());
-        assertEquals(3, entryView2.getHits());
-        assertEquals(3, entryView3.getHits());
+        //when reading from backups, hit counts and access time not tracked if actually read from a backup
+        if (!readFromBackups)
+        {
+            assertEquals(2, entryView1.getHits());
+            assertEquals(3, entryView2.getHits());
+            assertEquals(3, entryView3.getHits());
+
+            assertTrue(entryView1.getLastAccessTime() >= time1 && entryView1.getLastAccessTime() <= time2);
+            assertTrue(entryView2.getLastAccessTime() >= time3);
+            assertTrue(entryView3.getLastAccessTime() >= time2 && entryView3.getLastAccessTime() <= time3);
+        }
 
         assertEquals(1, entryView1.getVersion());
         assertEquals(2, entryView2.getVersion());
@@ -682,10 +767,6 @@ public class BasicMapTest extends HazelcastTestSupport {
         assertTrue(entryView1.getCreationTime() >= time1 && entryView1.getCreationTime() <= time2);
         assertTrue(entryView2.getCreationTime() >= time1 && entryView2.getCreationTime() <= time2);
         assertTrue(entryView3.getCreationTime() >= time1 && entryView3.getCreationTime() <= time2);
-
-        assertTrue(entryView1.getLastAccessTime() >= time1 && entryView1.getLastAccessTime() <= time2);
-        assertTrue(entryView2.getLastAccessTime() >= time3);
-        assertTrue(entryView3.getLastAccessTime() >= time2 && entryView3.getLastAccessTime() <= time3);
 
         assertTrue(entryView1.getLastUpdateTime() >= time1 && entryView1.getLastUpdateTime() <= time2);
         assertTrue(entryView2.getLastUpdateTime() >= time3);

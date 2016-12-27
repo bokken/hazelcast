@@ -38,6 +38,7 @@ import com.hazelcast.spi.EventFilter;
 import com.hazelcast.spi.ExecutionService;
 import com.hazelcast.spi.InternalCompletableFuture;
 import com.hazelcast.spi.NodeEngine;
+import com.hazelcast.util.MapUtil;
 import com.hazelcast.util.executor.CompletedFuture;
 
 import java.util.Collection;
@@ -118,20 +119,20 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
     }
 
     @Override
-    protected InternalCompletableFuture<Data> getAsyncInternal(final Data key) {
+    protected InternalCompletableFuture<Object> getAsyncInternal(final Data key) {
         Object value = nearCache.get(key);
         if (value != null) {
             if (isCachedNull(value)) {
                 value = null;
             }
-            return new CompletedFuture<Data>(
+            return new CompletedFuture<Object>(
                     getNodeEngine().getSerializationService(),
                     value,
                     getNodeEngine().getExecutionService().getExecutor(ExecutionService.ASYNC_EXECUTOR));
         }
 
         final boolean marked = keyStateMarker.markIfUnmarked(key);
-        InternalCompletableFuture<Data> future;
+        InternalCompletableFuture<Object> future;
         try {
             future = super.getAsyncInternal(key);
         } catch (Throwable t) {
@@ -139,9 +140,9 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
             throw rethrow(t);
         }
 
-        future.andThen(new ExecutionCallback<Data>() {
+        future.andThen(new ExecutionCallback<Object>() {
             @Override
-            public void onResponse(Data value) {
+            public void onResponse(Object value) {
                 if (marked) {
                     tryToPutNearCache(key, value);
                 }
@@ -161,8 +162,8 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
     }
 
     @Override
-    protected Data putInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
-        Data data = super.putInternal(key, value, ttl, timeunit);
+    protected Object putInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
+        Object data = super.putInternal(key, value, ttl, timeunit);
         invalidateCache(key);
         return data;
     }
@@ -175,8 +176,8 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
     }
 
     @Override
-    protected Data putIfAbsentInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
-        Data data = super.putIfAbsentInternal(key, value, ttl, timeunit);
+    protected Object putIfAbsentInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
+        Object data = super.putIfAbsentInternal(key, value, ttl, timeunit);
         invalidateCache(key);
         return data;
     }
@@ -209,8 +210,8 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
     }
 
     @Override
-    protected Data replaceInternal(Data key, Data value) {
-        Data replaceInternal = super.replaceInternal(key, value);
+    protected Object replaceInternal(Data key, Data value) {
+        Object replaceInternal = super.replaceInternal(key, value);
         invalidateCache(key);
         return replaceInternal;
     }
@@ -304,7 +305,7 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
     }
 
     @Override
-    protected void getAllObjectInternal(List<Data> keys, List<Object> resultingKeyValuePairs) {
+    protected <K,V> void getAllObjectInternal(List<Data> keys, Map<K,V> resultingKeyValuePairs) {
         getCachedValue(keys, resultingKeyValuePairs);
 
         Map<Data, Boolean> keyStates = createHashMap(keys.size());
@@ -314,15 +315,23 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
                 keyStates.put(key, keyStateMarker.markIfUnmarked(key));
             }
 
-            int currentSize = resultingKeyValuePairs.size();
-
-            super.getAllObjectInternal(keys, resultingKeyValuePairs);
+            //a map which only contains results corresponding to keys not any extra values that present before method called
+            final Map<K,V> keysResults;
+            if (resultingKeyValuePairs.isEmpty()) {
+                keysResults = resultingKeyValuePairs;
+                super.getAllObjectInternal(keys, resultingKeyValuePairs);
+            } else {
+                keysResults = MapUtil.createHashMap(keys.size());
+                super.getAllObjectInternal(keys, resultingKeyValuePairs);
+                resultingKeyValuePairs.putAll(keysResults);
+            }
+            
             // only add elements which are not in near-putCache
-            for (int i = currentSize; i < resultingKeyValuePairs.size(); ) {
-                Data key = toData(resultingKeyValuePairs.get(i++));
-                Data value = toData(resultingKeyValuePairs.get(i++));
+            for (Map.Entry<K, V> resultEntry : keysResults.entrySet()) {
+                Data key = toData(resultEntry.getKey());
                 boolean marked = keyStates.remove(key);
                 if (marked) {
+                    final Data value = toData(resultEntry.getValue());
                     tryToPutNearCache(key, value);
                 }
             }
@@ -403,7 +412,7 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
         return cached;
     }
 
-    protected void getCachedValue(List<Data> keys, List<Object> resultingKeyValuePairs) {
+    protected <K,V> void getCachedValue(List<Data> keys, Map<K,V> resultingKeyValuePairs) {
         Iterator<Data> iterator = keys.iterator();
         while (iterator.hasNext()) {
             Data key = iterator.next();
@@ -412,8 +421,9 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
                 continue;
             }
             if (!isCachedNull(value)) {
-                resultingKeyValuePairs.add(toObject(key));
-                resultingKeyValuePairs.add(toObject(value));
+                final K keyValue = toObject(key);
+                final V objectValue = toObject(value);
+                resultingKeyValuePairs.put(keyValue, objectValue);
             }
             iterator.remove();
         }

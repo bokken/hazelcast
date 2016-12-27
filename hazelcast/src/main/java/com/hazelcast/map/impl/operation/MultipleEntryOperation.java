@@ -30,7 +30,6 @@ import com.hazelcast.spi.serialization.SerializationService;
 import com.hazelcast.util.SetUtil;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,11 +69,8 @@ public class MultipleEntryOperation extends AbstractMultipleEntryOperation imple
             if (!isEntryProcessable(entry)) {
                 continue;
             }
-
-            Data response = process(entry);
-            if (response != null) {
-                responses.add(key, response);
-            }
+            
+            processToEntries(key, entry, responses);
 
             // first call noOp, other if checks below depends on it.
             if (noOp(entry, value, now)) {

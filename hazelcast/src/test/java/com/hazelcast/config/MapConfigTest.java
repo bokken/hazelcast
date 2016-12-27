@@ -20,6 +20,7 @@ import com.hazelcast.map.listener.MapPartitionLostListener;
 import com.hazelcast.test.HazelcastParallelClassRunner;
 import com.hazelcast.test.annotation.ParallelTest;
 import com.hazelcast.test.annotation.QuickTest;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -404,5 +405,21 @@ public class MapConfigTest {
 
         // then
         assertEquals(mapConfig, otherMapConfig);
+    }
+    
+    @Test
+    public void testDefaultTrueDefensiveCopy()
+    {
+        MapConfig mapConfig = new MapConfig();
+        
+        assertTrue(mapConfig.isForceDefensiveCopy());
+    }
+    
+    @Test
+    public void testDefensiveCopyFalse()
+    {
+        MapConfig mapConfig = new MapConfig();
+        mapConfig.setForceDefensiveCopy(false);
+        assertFalse(mapConfig.isForceDefensiveCopy());
     }
 }
