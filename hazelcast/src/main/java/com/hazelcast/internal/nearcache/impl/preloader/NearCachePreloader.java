@@ -116,6 +116,12 @@ public class NearCachePreloader<KS> {
      * @param adapter the {@link DataStructureAdapter} to load the values from
      */
     public void loadKeys(DataStructureAdapter<Data, ?> adapter) {
+        if (!storeFile.exists()) {
+            logger.info(format("Skipped loading keys of Near Cache %s since storage file doesn't exist (%s)", nearCacheName,
+                    storeFile.getAbsolutePath()));
+            return;
+        }
+
         long startedNanos = System.nanoTime();
         BufferingInputStream bis = null;
         try {
@@ -129,8 +135,7 @@ public class NearCachePreloader<KS> {
             long elapsedMillis = getElapsedMillis(startedNanos);
             logger.info(format("Loaded %d keys of Near Cache %s in %d ms", loadedKeys, nearCacheName, elapsedMillis));
         } catch (Exception e) {
-            logger.warning(format("Could not pre-load Near Cache %s (%s): [%s] %s", nearCacheName, storeFile.getAbsolutePath(),
-                    e.getClass().getSimpleName(), e.getMessage()));
+            logger.warning(format("Could not pre-load Near Cache %s (%s)", nearCacheName, storeFile.getAbsolutePath()), e);
         } finally {
             closeResource(bis);
         }
@@ -191,8 +196,7 @@ public class NearCachePreloader<KS> {
 
             updatePersistenceStats(startedNanos);
         } catch (Exception e) {
-            logger.warning(format("Could not store keys of Near Cache %s (%s): [%s] %s", nearCacheName,
-                    storeFile.getAbsolutePath(), e.getClass().getSimpleName(), e.getMessage()));
+            logger.warning(format("Could not store keys of Near Cache %s (%s)", nearCacheName, storeFile.getAbsolutePath()), e);
         } finally {
             deleteQuietly(tmpStoreFile);
             closeResource(fos);
