@@ -76,7 +76,7 @@ public abstract class MutatingKeyBasedMapOperation extends MapOperation
     }
 
     public final Data getValue() {
-        return getNodeEngine().toData(dataValue);
+        return dataValue == null || dataValue instanceof Data ? (Data) dataValue : getNodeEngine().toData(dataValue);
     }
 
     public final long getTtl() {
