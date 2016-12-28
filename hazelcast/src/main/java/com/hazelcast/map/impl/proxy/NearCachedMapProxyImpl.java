@@ -162,21 +162,21 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
     }
 
     @Override
-    protected Object putInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
+    protected Object putInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
         Object data = super.putInternal(key, value, ttl, timeunit);
         invalidateCache(key);
         return data;
     }
 
     @Override
-    protected boolean tryPutInternal(Data key, Data value, long timeout, TimeUnit timeunit) {
+    protected boolean tryPutInternal(Data key, Object value, long timeout, TimeUnit timeunit) {
         boolean putInternal = super.tryPutInternal(key, value, timeout, timeunit);
         invalidateCache(key);
         return putInternal;
     }
 
     @Override
-    protected Object putIfAbsentInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
+    protected Object putIfAbsentInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
         Object data = super.putIfAbsentInternal(key, value, ttl, timeunit);
         invalidateCache(key);
         return data;
@@ -189,14 +189,14 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
     }
 
     @Override
-    protected InternalCompletableFuture<Data> putAsyncInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
+    protected InternalCompletableFuture<Data> putAsyncInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
         InternalCompletableFuture<Data> future = super.putAsyncInternal(key, value, ttl, timeunit);
         invalidateCache(key);
         return future;
     }
 
     @Override
-    protected InternalCompletableFuture<Data> setAsyncInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
+    protected InternalCompletableFuture<Data> setAsyncInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
         InternalCompletableFuture<Data> future = super.setAsyncInternal(key, value, ttl, timeunit);
         invalidateCache(key);
         return future;
@@ -217,7 +217,7 @@ public class NearCachedMapProxyImpl<K, V> extends MapProxyImpl<K, V> {
     }
 
     @Override
-    protected void setInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
+    protected void setInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
         super.setInternal(key, value, ttl, timeunit);
         invalidateCache(key);
     }

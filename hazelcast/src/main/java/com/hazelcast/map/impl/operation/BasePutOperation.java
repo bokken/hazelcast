@@ -34,11 +34,11 @@ public abstract class BasePutOperation extends LockAwareOperation implements Bac
     protected transient EntryEventType eventType;
     protected transient boolean putTransient;
 
-    public BasePutOperation(String name, Data dataKey, Data value) {
+    public BasePutOperation(String name, Data dataKey, Object value) {
         super(name, dataKey, value, -1);
     }
 
-    public BasePutOperation(String name, Data dataKey, Data value, long ttl) {
+    public BasePutOperation(String name, Data dataKey, Object value, long ttl) {
         super(name, dataKey, value, ttl);
     }
 

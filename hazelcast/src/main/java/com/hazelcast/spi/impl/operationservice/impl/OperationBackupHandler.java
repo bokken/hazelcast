@@ -26,9 +26,9 @@ import com.hazelcast.spi.Operation;
 import com.hazelcast.spi.impl.NodeEngineImpl;
 import com.hazelcast.spi.impl.operationservice.impl.operations.Backup;
 
-import static com.hazelcast.internal.partition.InternalPartition.MAX_BACKUP_COUNT;
 import static com.hazelcast.spi.OperationAccessor.hasActiveInvocation;
 import static com.hazelcast.spi.OperationAccessor.setCallId;
+import static com.hazelcast.spi.partition.IPartition.MAX_BACKUP_COUNT;
 import static java.lang.Math.min;
 
 /**
@@ -254,6 +254,7 @@ final class OperationBackupHandler {
         // if getServiceName() method is overridden to return the same name
         // then this will have no effect.
         backupOp.setServiceName(op.getServiceName());
+        backupOp.setNodeEngine(op.getNodeEngine());
         return backupOp;
     }
 

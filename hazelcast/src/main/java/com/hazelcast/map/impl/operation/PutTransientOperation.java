@@ -24,7 +24,7 @@ public class PutTransientOperation extends BasePutOperation {
     public PutTransientOperation() {
     }
 
-    public PutTransientOperation(String name, Data dataKey, Data value, long ttl) {
+    public PutTransientOperation(String name, Data dataKey, Object value, long ttl) {
         super(name, dataKey, value, ttl);
     }
 

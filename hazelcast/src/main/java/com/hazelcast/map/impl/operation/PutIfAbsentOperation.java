@@ -23,7 +23,7 @@ public class PutIfAbsentOperation extends BasePutOperation {
 
     private boolean successful;
 
-    public PutIfAbsentOperation(String name, Data dataKey, Data value, long ttl) {
+    public PutIfAbsentOperation(String name, Data dataKey, Object value, long ttl) {
         super(name, dataKey, value, ttl);
     }
 

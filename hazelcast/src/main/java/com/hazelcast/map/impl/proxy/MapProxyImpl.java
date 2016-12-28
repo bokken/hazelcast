@@ -16,25 +16,6 @@
 
 package com.hazelcast.map.impl.proxy;
 
-import static com.hazelcast.config.InMemoryFormat.NATIVE;
-import static com.hazelcast.map.impl.MapService.SERVICE_NAME;
-import static com.hazelcast.map.impl.querycache.subscriber.QueryCacheRequests.newQueryCacheRequest;
-import static com.hazelcast.util.Preconditions.checkNotInstanceOf;
-import static com.hazelcast.util.Preconditions.checkNotNull;
-import static com.hazelcast.util.Preconditions.checkPositive;
-import static com.hazelcast.util.Preconditions.checkTrue;
-import static com.hazelcast.util.Preconditions.isNotNull;
-import static java.util.Collections.emptyMap;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import com.hazelcast.aggregation.Aggregator;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.EntryListener;
@@ -93,6 +74,25 @@ import com.hazelcast.util.SetUtil;
 import com.hazelcast.util.UuidUtil;
 import com.hazelcast.util.executor.DelegatingFuture;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import static com.hazelcast.config.InMemoryFormat.NATIVE;
+import static com.hazelcast.map.impl.MapService.SERVICE_NAME;
+import static com.hazelcast.map.impl.querycache.subscriber.QueryCacheRequests.newQueryCacheRequest;
+import static com.hazelcast.util.Preconditions.checkNotInstanceOf;
+import static com.hazelcast.util.Preconditions.checkNotNull;
+import static com.hazelcast.util.Preconditions.checkPositive;
+import static com.hazelcast.util.Preconditions.checkTrue;
+import static com.hazelcast.util.Preconditions.isNotNull;
+import static java.util.Collections.emptyMap;
+
 /**
  * Proxy implementation of {@link com.hazelcast.core.IMap} interface.
  *
@@ -125,8 +125,7 @@ public class MapProxyImpl<K, V> extends MapProxySupport implements IMap<K, V>, I
         checkNotNull(v, NULL_VALUE_IS_NOT_ALLOWED);
 
         Data key = toData(k, partitionStrategy);
-        Data value = toData(v);
-        Object result = putInternal(key, value, ttl, timeunit);
+        Object result = putInternal(key, v, ttl, timeunit);
         return toObject(result);
     }
 
@@ -136,8 +135,7 @@ public class MapProxyImpl<K, V> extends MapProxySupport implements IMap<K, V>, I
         checkNotNull(v, NULL_VALUE_IS_NOT_ALLOWED);
 
         Data key = toData(k, partitionStrategy);
-        Data value = toData(v);
-        return tryPutInternal(key, value, timeout, timeunit);
+        return tryPutInternal(key, v, timeout, timeunit);
     }
 
     @Override
@@ -151,8 +149,7 @@ public class MapProxyImpl<K, V> extends MapProxySupport implements IMap<K, V>, I
         checkNotNull(v, NULL_VALUE_IS_NOT_ALLOWED);
 
         Data key = toData(k, partitionStrategy);
-        Data value = toData(v);
-        Object result = putIfAbsentInternal(key, value, ttl, timeunit);
+        Object result = putIfAbsentInternal(key, v, ttl, timeunit);
         return toObject(result);
     }
 
@@ -199,8 +196,7 @@ public class MapProxyImpl<K, V> extends MapProxySupport implements IMap<K, V>, I
         checkNotNull(v, NULL_VALUE_IS_NOT_ALLOWED);
 
         Data key = toData(k, partitionStrategy);
-        Data value = toData(v);
-        setInternal(key, value, ttl, timeunit);
+        setInternal(key, v, ttl, timeunit);
     }
 
     @Override
@@ -317,8 +313,7 @@ public class MapProxyImpl<K, V> extends MapProxySupport implements IMap<K, V>, I
         checkNotNull(value, NULL_VALUE_IS_NOT_ALLOWED);
 
         Data dataKey = toData(key, partitionStrategy);
-        Data dataValue = toData(value);
-        return new DelegatingFuture<V>(putAsyncInternal(dataKey, dataValue, ttl, timeunit),
+        return new DelegatingFuture<V>(putAsyncInternal(dataKey, value, ttl, timeunit),
                 getNodeEngine().getSerializationService());
     }
 

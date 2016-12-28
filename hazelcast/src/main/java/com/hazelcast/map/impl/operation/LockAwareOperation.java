@@ -36,7 +36,7 @@ public abstract class LockAwareOperation extends MutatingKeyBasedMapOperation im
         super(name, dataKey, ttl);
     }
 
-    protected LockAwareOperation(String name, Data dataKey, Data dataValue, long ttl) {
+    protected LockAwareOperation(String name, Data dataKey, Object dataValue, long ttl) {
         super(name, dataKey, dataValue, ttl);
     }
 

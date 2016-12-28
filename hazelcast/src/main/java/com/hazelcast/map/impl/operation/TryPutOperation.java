@@ -24,7 +24,7 @@ public class TryPutOperation extends BasePutOperation {
     public TryPutOperation() {
     }
 
-    public TryPutOperation(String name, Data dataKey, Data value, long timeout) {
+    public TryPutOperation(String name, Data dataKey, Object value, long timeout) {
         super(name, dataKey, value);
         setWaitTimeout(timeout);
     }

@@ -33,15 +33,15 @@ import java.util.Set;
  */
 public interface MapOperationProvider {
 
-    MapOperation createPutOperation(String name, Data key, Data value, long ttl);
+    MapOperation createPutOperation(String name, Data key, Object value, long ttl);
 
-    MapOperation createTryPutOperation(String name, Data dataKey, Data value, long timeout);
+    MapOperation createTryPutOperation(String name, Data dataKey, Object value, long timeout);
 
-    MapOperation createSetOperation(String name, Data dataKey, Data value, long ttl);
+    MapOperation createSetOperation(String name, Data dataKey, Object value, long ttl);
 
-    MapOperation createPutIfAbsentOperation(String name, Data key, Data value, long ttl);
+    MapOperation createPutIfAbsentOperation(String name, Data key, Object value, long ttl);
 
-    MapOperation createPutTransientOperation(String name, Data key, Data value, long ttl);
+    MapOperation createPutTransientOperation(String name, Data key, Object value, long ttl);
 
     MapOperation createRemoveOperation(String name, Data key, boolean disableWanReplicationEvent);
 

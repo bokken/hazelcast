@@ -44,27 +44,27 @@ public class DefaultMapOperationProvider implements MapOperationProvider {
     }
 
     @Override
-    public MapOperation createPutOperation(String name, Data key, Data value, long ttl) {
+    public MapOperation createPutOperation(String name, Data key, Object value, long ttl) {
         return new PutOperation(name, key, value, ttl);
     }
 
     @Override
-    public MapOperation createTryPutOperation(String name, Data dataKey, Data value, long timeout) {
+    public MapOperation createTryPutOperation(String name, Data dataKey, Object value, long timeout) {
         return new TryPutOperation(name, dataKey, value, timeout);
     }
 
     @Override
-    public MapOperation createSetOperation(String name, Data dataKey, Data value, long ttl) {
+    public MapOperation createSetOperation(String name, Data dataKey, Object value, long ttl) {
         return new SetOperation(name, dataKey, value, ttl);
     }
 
     @Override
-    public MapOperation createPutIfAbsentOperation(String name, Data key, Data value, long ttl) {
+    public MapOperation createPutIfAbsentOperation(String name, Data key, Object value, long ttl) {
         return new PutIfAbsentOperation(name, key, value, ttl);
     }
 
     @Override
-    public MapOperation createPutTransientOperation(String name, Data key, Data value, long ttl) {
+    public MapOperation createPutTransientOperation(String name, Data key, Object value, long ttl) {
         return new PutTransientOperation(name, key, value, ttl);
     }
 

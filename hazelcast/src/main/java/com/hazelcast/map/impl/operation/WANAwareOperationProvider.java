@@ -47,31 +47,31 @@ public class WANAwareOperationProvider extends MapOperationProviderDelegator {
     }
 
     @Override
-    public MapOperation createPutOperation(String name, Data key, Data value, long ttl) {
+    public MapOperation createPutOperation(String name, Data key, Object value, long ttl) {
         checkWanReplicationQueues(name);
         return getDelegate().createPutOperation(name, key, value, ttl);
     }
 
     @Override
-    public MapOperation createTryPutOperation(String name, Data dataKey, Data value, long timeout) {
+    public MapOperation createTryPutOperation(String name, Data dataKey, Object value, long timeout) {
         checkWanReplicationQueues(name);
         return getDelegate().createTryPutOperation(name, dataKey, value, timeout);
     }
 
     @Override
-    public MapOperation createSetOperation(String name, Data dataKey, Data value, long ttl) {
+    public MapOperation createSetOperation(String name, Data dataKey, Object value, long ttl) {
         checkWanReplicationQueues(name);
         return getDelegate().createSetOperation(name, dataKey, value, ttl);
     }
 
     @Override
-    public MapOperation createPutIfAbsentOperation(String name, Data key, Data value, long ttl) {
+    public MapOperation createPutIfAbsentOperation(String name, Data key, Object value, long ttl) {
         checkWanReplicationQueues(name);
         return getDelegate().createPutIfAbsentOperation(name, key, value, ttl);
     }
 
     @Override
-    public MapOperation createPutTransientOperation(String name, Data key, Data value, long ttl) {
+    public MapOperation createPutTransientOperation(String name, Data key, Object value, long ttl) {
         checkWanReplicationQueues(name);
         return getDelegate().createPutTransientOperation(name, key, value, ttl);
     }

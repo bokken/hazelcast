@@ -81,7 +81,7 @@ public class PutAllOperation extends MapOperation implements PartitionAwareOpera
         }
 
         for (int i = 0; i < mapEntries.size(); i++) {
-            put(mapEntries.getKey(i), mapEntries.getValue(i));
+            put(mapEntries.getKey(i), mapEntries.getObjectValue(i));
         }
     }
 
@@ -93,19 +93,19 @@ public class PutAllOperation extends MapOperation implements PartitionAwareOpera
         return (mapContainer.getTotalBackupCount() > 0);
     }
 
-    private void put(Data dataKey, Data dataValue) {
-        Object oldValue = putToRecordStore(dataKey, dataValue);
-        dataValue = getValueOrPostProcessedValue(dataKey, dataValue);
-        mapServiceContext.interceptAfterPut(name, dataValue);
+    private void put(Data dataKey, Object value) {
+        Object oldValue = putToRecordStore(dataKey, value);
+        value = getValueOrPostProcessedValue(dataKey, value);
+        mapServiceContext.interceptAfterPut(name, value);
 
         if (hasMapListener) {
             EntryEventType eventType = (oldValue == null ? ADDED : UPDATED);
-            mapEventPublisher.publishEvent(getCallerAddress(), name, eventType, dataKey, oldValue, dataValue);
+            mapEventPublisher.publishEvent(getCallerAddress(), name, eventType, dataKey, oldValue, value);
         }
 
         Record record = (hasWanReplication || hasBackups) ? recordStore.getRecord(dataKey) : null;
         if (hasWanReplication) {
-            EntryView entryView = createSimpleEntryView(dataKey, dataValue, record);
+            EntryView entryView = createSimpleEntryView(dataKey, value, record);
             mapEventPublisher.publishWanReplicationUpdate(name, entryView);
         }
         if (hasBackups) {
@@ -124,11 +124,11 @@ public class PutAllOperation extends MapOperation implements PartitionAwareOpera
      * which can lead to a serious performance degradation if loading from MapStore is expensive.
      * We prevent this by calling recordStore.set() if no map listeners are registered.
      */
-    private Object putToRecordStore(Data dataKey, Data dataValue) {
+    private Object putToRecordStore(Data dataKey, Object value) {
         if (hasMapListener) {
-            return recordStore.put(dataKey, dataValue, DEFAULT_TTL);
+            return recordStore.put(dataKey, value, DEFAULT_TTL);
         }
-        recordStore.set(dataKey, dataValue, DEFAULT_TTL);
+        recordStore.set(dataKey, value, DEFAULT_TTL);
         return null;
     }
 
@@ -139,12 +139,13 @@ public class PutAllOperation extends MapOperation implements PartitionAwareOpera
         super.afterRun();
     }
 
-    private Data getValueOrPostProcessedValue(Data dataKey, Data dataValue) {
+    private Object getValueOrPostProcessedValue(Data dataKey, Object value) {
         if (!isPostProcessing(recordStore)) {
-            return dataValue;
+            return value;
         }
         Record record = recordStore.getRecord(dataKey);
-        return mapServiceContext.toData(record.getValue());
+        final Object recordValue = record.getValue();
+	return mapContainer.getMapConfig().isForceDefensiveCopy() ? mapServiceContext.toData(recordValue) : recordValue;
     }
 
     @Override

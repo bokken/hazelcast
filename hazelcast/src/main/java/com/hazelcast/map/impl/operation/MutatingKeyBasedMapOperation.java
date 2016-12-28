@@ -31,7 +31,7 @@ public abstract class MutatingKeyBasedMapOperation extends MapOperation
 
     protected Data dataKey;
     protected long threadId;
-    protected Data dataValue;
+    protected Object dataValue;
     protected long ttl = DEFAULT_TTL;
 
     public MutatingKeyBasedMapOperation() {
@@ -42,7 +42,7 @@ public abstract class MutatingKeyBasedMapOperation extends MapOperation
         this.dataKey = dataKey;
     }
 
-    protected MutatingKeyBasedMapOperation(String name, Data dataKey, Data dataValue) {
+    protected MutatingKeyBasedMapOperation(String name, Data dataKey, Object dataValue) {
         super(name);
         this.dataKey = dataKey;
         this.dataValue = dataValue;
@@ -54,7 +54,7 @@ public abstract class MutatingKeyBasedMapOperation extends MapOperation
         this.ttl = ttl;
     }
 
-    protected MutatingKeyBasedMapOperation(String name, Data dataKey, Data dataValue, long ttl) {
+    protected MutatingKeyBasedMapOperation(String name, Data dataKey, Object dataValue, long ttl) {
         super(name);
         this.dataKey = dataKey;
         this.dataValue = dataValue;
@@ -76,7 +76,7 @@ public abstract class MutatingKeyBasedMapOperation extends MapOperation
     }
 
     public final Data getValue() {
-        return dataValue;
+        return getNodeEngine().toData(dataValue);
     }
 
     public final long getTtl() {
@@ -88,7 +88,7 @@ public abstract class MutatingKeyBasedMapOperation extends MapOperation
         out.writeUTF(name);
         out.writeData(dataKey);
         out.writeLong(threadId);
-        out.writeData(dataValue);
+        out.writeData(getValue());
         out.writeLong(ttl);
     }
 

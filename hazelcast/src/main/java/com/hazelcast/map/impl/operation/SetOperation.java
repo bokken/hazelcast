@@ -29,7 +29,7 @@ public class SetOperation extends BasePutOperation {
     public SetOperation() {
     }
 
-    public SetOperation(String name, Data dataKey, Data value, long ttl) {
+    public SetOperation(String name, Data dataKey, Object value, long ttl) {
         super(name, dataKey, value, ttl);
     }
 

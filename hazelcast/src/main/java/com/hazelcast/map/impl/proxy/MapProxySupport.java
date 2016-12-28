@@ -16,35 +16,6 @@
 
 package com.hazelcast.map.impl.proxy;
 
-import static com.hazelcast.config.MapIndexConfig.validateIndexAttribute;
-import static com.hazelcast.core.EntryEventType.CLEAR_ALL;
-import static com.hazelcast.map.impl.EntryRemovingProcessor.ENTRY_REMOVING_PROCESSOR;
-import static com.hazelcast.map.impl.MapService.SERVICE_NAME;
-import static com.hazelcast.util.ExceptionUtil.rethrow;
-import static com.hazelcast.util.FutureUtil.logAllExceptions;
-import static com.hazelcast.util.IterableUtil.nullToEmpty;
-import static com.hazelcast.util.Preconditions.checkNotNull;
-import static java.lang.Math.ceil;
-import static java.lang.Math.log10;
-import static java.lang.Math.min;
-import static java.util.Collections.singleton;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.logging.Level.WARNING;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EventListener;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import com.hazelcast.concurrent.lock.LockProxySupport;
 import com.hazelcast.concurrent.lock.LockServiceImpl;
 import com.hazelcast.config.EntryListenerConfig;
@@ -111,6 +82,35 @@ import com.hazelcast.util.MapUtil;
 import com.hazelcast.util.MutableLong;
 import com.hazelcast.util.SetUtil;
 import com.hazelcast.util.ThreadUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EventListener;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import static com.hazelcast.config.MapIndexConfig.validateIndexAttribute;
+import static com.hazelcast.core.EntryEventType.CLEAR_ALL;
+import static com.hazelcast.map.impl.EntryRemovingProcessor.ENTRY_REMOVING_PROCESSOR;
+import static com.hazelcast.map.impl.MapService.SERVICE_NAME;
+import static com.hazelcast.util.ExceptionUtil.rethrow;
+import static com.hazelcast.util.FutureUtil.logAllExceptions;
+import static com.hazelcast.util.IterableUtil.nullToEmpty;
+import static com.hazelcast.util.Preconditions.checkNotNull;
+import static java.lang.Math.ceil;
+import static java.lang.Math.log10;
+import static java.lang.Math.min;
+import static java.util.Collections.singleton;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.logging.Level.WARNING;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -342,23 +342,27 @@ abstract class MapProxySupport extends AbstractDistributedObject<MapService> imp
         }
     }
 
-    protected Object putInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
-        MapOperation operation = operationProvider.createPutOperation(name, key, value, getTimeInMillis(ttl, timeunit));
+    protected Object putInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
+	Object v = mapConfig.isForceDefensiveCopy() ? toData(value) : value;
+        MapOperation operation = operationProvider.createPutOperation(name, key, v, getTimeInMillis(ttl, timeunit));
         return invokeOperation(key, operation);
     }
 
-    protected boolean tryPutInternal(Data key, Data value, long timeout, TimeUnit timeunit) {
-        MapOperation operation = operationProvider.createTryPutOperation(name, key, value, getTimeInMillis(timeout, timeunit));
+    protected boolean tryPutInternal(Data key, Object value, long timeout, TimeUnit timeunit) {
+	Object v = mapConfig.isForceDefensiveCopy() ? toData(value) : value;
+        MapOperation operation = operationProvider.createTryPutOperation(name, key, v, getTimeInMillis(timeout, timeunit));
         return (Boolean) invokeOperation(key, operation);
     }
 
-    protected Object putIfAbsentInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
-        MapOperation operation = operationProvider.createPutIfAbsentOperation(name, key, value, getTimeInMillis(ttl, timeunit));
+    protected Object putIfAbsentInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
+	Object v = mapConfig.isForceDefensiveCopy() ? toData(value) : value;
+        MapOperation operation = operationProvider.createPutIfAbsentOperation(name, key, v, getTimeInMillis(ttl, timeunit));
         return invokeOperation(key, operation);
     }
 
     protected void putTransientInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
-        MapOperation operation = operationProvider.createPutTransientOperation(name, key, value, getTimeInMillis(ttl, timeunit));
+	Object v = mapConfig.isForceDefensiveCopy() ? toData(value) : value;
+        MapOperation operation = operationProvider.createPutTransientOperation(name, key, v, getTimeInMillis(ttl, timeunit));
         invokeOperation(key, operation);
     }
 
@@ -386,9 +390,10 @@ abstract class MapProxySupport extends AbstractDistributedObject<MapService> imp
         }
     }
 
-    protected InternalCompletableFuture<Data> putAsyncInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
+    protected InternalCompletableFuture<Data> putAsyncInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
+	Object v = mapConfig.isForceDefensiveCopy() ? toData(value) : value;
         int partitionId = getNodeEngine().getPartitionService().getPartitionId(key);
-        MapOperation operation = operationProvider.createPutOperation(name, key, value, getTimeInMillis(ttl, timeunit));
+        MapOperation operation = operationProvider.createPutOperation(name, key, v, getTimeInMillis(ttl, timeunit));
         operation.setThreadId(ThreadUtil.getThreadId());
         try {
             long startTime = System.currentTimeMillis();
@@ -404,9 +409,10 @@ abstract class MapProxySupport extends AbstractDistributedObject<MapService> imp
         }
     }
 
-    protected InternalCompletableFuture<Data> setAsyncInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
+    protected InternalCompletableFuture<Data> setAsyncInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
+	Object v = mapConfig.isForceDefensiveCopy() ? toData(value) : value;
         int partitionId = getNodeEngine().getPartitionService().getPartitionId(key);
-        MapOperation operation = operationProvider.createSetOperation(name, key, value, getTimeInMillis(ttl, timeunit));
+        MapOperation operation = operationProvider.createSetOperation(name, key, v, getTimeInMillis(ttl, timeunit));
         operation.setThreadId(ThreadUtil.getThreadId());
         try {
             return operationService.invokeOnPartition(SERVICE_NAME, operation, partitionId);
@@ -427,8 +433,9 @@ abstract class MapProxySupport extends AbstractDistributedObject<MapService> imp
 
     //warning: When UpdateEvent is fired it does *NOT* contain oldValue.
     //see this: https://github.com/hazelcast/hazelcast/pull/6088#issuecomment-136025968
-    protected void setInternal(Data key, Data value, long ttl, TimeUnit timeunit) {
-        MapOperation operation = operationProvider.createSetOperation(name, key, value, timeunit.toMillis(ttl));
+    protected void setInternal(Data key, Object value, long ttl, TimeUnit timeunit) {
+	Object v = mapConfig.isForceDefensiveCopy() ? toData(value) : value;
+        MapOperation operation = operationProvider.createSetOperation(name, key, v, timeunit.toMillis(ttl));
         invokeOperation(key, operation);
     }
 
@@ -801,7 +808,14 @@ abstract class MapProxySupport extends AbstractDistributedObject<MapService> imp
                     entriesPerPartition[partitionId] = entries;
                 }
 
-                entries.add(keyData, toData(entry.getValue()));
+                if (mapConfig.isForceDefensiveCopy())
+                {
+                    entries.add(keyData, toData(entry.getValue()));
+                }
+                else
+                {
+                    entries.add(keyData, entry.getValue(), serializationService);
+                }
 
                 if (useBatching) {
                     long currentSize = ++counterPerMember[partitionId].value;

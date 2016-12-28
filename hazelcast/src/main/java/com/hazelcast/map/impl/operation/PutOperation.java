@@ -24,7 +24,7 @@ public class PutOperation extends BasePutOperation {
     public PutOperation() {
     }
 
-    public PutOperation(String name, Data dataKey, Data value, long ttl) {
+    public PutOperation(String name, Data dataKey, Object value, long ttl) {
         super(name, dataKey, value, ttl);
     }
 

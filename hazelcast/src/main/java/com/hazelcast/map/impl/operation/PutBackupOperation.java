@@ -40,20 +40,20 @@ public final class PutBackupOperation extends MutatingKeyBasedMapOperation imple
     private boolean putTransient;
     private boolean disableWanReplicationEvent;
 
-    public PutBackupOperation(String name, Data dataKey, Data dataValue, RecordInfo recordInfo) {
+    public PutBackupOperation(String name, Data dataKey, Object dataValue, RecordInfo recordInfo) {
         this(name, dataKey, dataValue, recordInfo, false, false);
     }
 
-    public PutBackupOperation(String name, Data dataKey, Data dataValue, RecordInfo recordInfo, boolean putTransient) {
+    public PutBackupOperation(String name, Data dataKey, Object dataValue, RecordInfo recordInfo, boolean putTransient) {
         this(name, dataKey, dataValue, recordInfo, false, putTransient);
     }
 
-    public PutBackupOperation(String name, Data dataKey, Data dataValue,
+    public PutBackupOperation(String name, Data dataKey, Object dataValue,
                               RecordInfo recordInfo, boolean unlockKey, boolean putTransient) {
         this(name, dataKey, dataValue, recordInfo, unlockKey, putTransient, false);
     }
 
-    public PutBackupOperation(String name, Data dataKey, Data dataValue,
+    public PutBackupOperation(String name, Data dataKey, Object dataValue,
                               RecordInfo recordInfo, boolean unlockKey, boolean putTransient,
                               boolean disableWanReplicationEvent) {
         super(name, dataKey, dataValue);

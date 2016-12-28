@@ -155,9 +155,8 @@ public class BasicMapTest extends HazelcastTestSupport {
         assertEquals(value, map.get(key));
     }
     
-    private void assertValue(Map<String, Object> map, String key, AtomicBoolean sameValue)
+    private void assertValue(Map<String, Object> map, String key, Object v1, AtomicBoolean sameValue)
     {
-        final Object v1 = map.get(key);
         if (defensiveCopy) {
             if (sameValue != null) {
                 assertNotSame(map.get(key), v1);
@@ -179,48 +178,48 @@ public class BasicMapTest extends HazelcastTestSupport {
         map.put("boolean", booleanArray);
         final boolean[] actualBools = (boolean[]) map.get("boolean");
         assertTrue(Arrays.equals(booleanArray, actualBools));
-        assertValue(map, "boolean", sameValues);
+        assertValue(map, "boolean", booleanArray, sameValues);
 
         int[] intArray = {1, 2};
         map.put("int", intArray);
         final int[] actualInts = (int[]) map.get("int");
         assertArrayEquals(intArray, actualInts);
-        assertValue(map, "int", sameValues);
+        assertValue(map, "int", intArray, sameValues);
 
         short[] shortArray = {(short) 1, (short) 2};
         map.put("short", shortArray);
         assertArrayEquals(shortArray, (short[]) map.get("short"));
-        assertValue(map, "short", sameValues);
+        assertValue(map, "short", shortArray, sameValues);
 
         byte[] byteArray = {(byte) 1, (byte) 2};
         map.put("byte", byteArray);
         assertArrayEquals(byteArray, (byte[]) map.get("byte"));
-        assertValue(map, "byte", sameValues);
+        assertValue(map, "byte", byteArray, sameValues);
 
         long[] longArray = {1L, 2L};
         map.put("long", longArray);
         assertArrayEquals(longArray, (long[]) map.get("long"));
-        assertValue(map, "long", sameValues);
+        assertValue(map, "long", longArray, sameValues);
 
         float[] floatArray = {(float) 1, (float) 2};
         map.put("float", floatArray);
         assertTrue(Arrays.equals(floatArray, (float[]) map.get("float")));
-        assertValue(map, "float", sameValues);
+        assertValue(map, "float", floatArray, sameValues);
 
         double[] doubleArray = {(double) 1.2, (double) 2.3};
         map.put("double", doubleArray);
         assertTrue(Arrays.equals(doubleArray, (double[]) map.get("double")));
-        assertValue(map, "double", sameValues);
+        assertValue(map, "double", doubleArray, sameValues);
 
         char[] charArray = {'1', '2'};
         map.put("char", charArray);
         assertArrayEquals(charArray, (char[]) map.get("char"));
-        assertValue(map, "char", sameValues);
+        assertValue(map, "char", charArray, sameValues);
 
         Object[] objectArray = {"foo", null, Integer.decode("3")};
         map.put("object", objectArray);
         assertArrayEquals(objectArray, (Object[]) map.get("object"));
-        assertValue(map, "object", sameValues);
+        assertValue(map, "object", objectArray, sameValues);
         
         //if not defensive copies, then at least one of the array instances should be identical
         //if the value was not available locally, subsequent calls would not be identical,
@@ -864,14 +863,23 @@ public class BasicMapTest extends HazelcastTestSupport {
         int size = 100;
         Map<Integer, Integer> mm = new HashMap<Integer, Integer>();
         for (int i = 0; i < size; i++) {
-            mm.put(i, i);
+            //import to use integer constructor to force use of new instance not cached instance
+            //to be able to meaningfully test if the defensive copy is created or not
+            mm.put(i, new Integer(i));
         }
+        
+        boolean sameInstance = false;
 
         map.putAll(mm);
         assertEquals(size, map.size());
         for (int i = 0; i < size; i++) {
             assertEquals(map.get(i).intValue(), i);
+            if (map.get(i) == mm.get(i)) {
+        	sameInstance = true;
+            }
         }
+        
+        assertNotEquals(defensiveCopy, sameInstance);
 
         size = 10000;
         for (int i = 0; i < size; i++) {
