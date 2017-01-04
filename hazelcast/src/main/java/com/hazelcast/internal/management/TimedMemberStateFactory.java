@@ -38,6 +38,7 @@ import com.hazelcast.instance.MemberImpl;
 import com.hazelcast.instance.Node;
 import com.hazelcast.internal.cluster.ClusterService;
 import com.hazelcast.internal.management.dto.ClientEndPointDTO;
+import com.hazelcast.internal.management.dto.ClusterHotRestartStatusDTO;
 import com.hazelcast.internal.partition.InternalPartitionService;
 import com.hazelcast.map.impl.MapService;
 import com.hazelcast.monitor.LocalExecutorStats;
@@ -172,6 +173,7 @@ public class TimedMemberStateFactory {
 
         createNodeState(memberState);
         createHotRestartState(memberState);
+        createClusterHotRestarStatus(memberState);
         createWanSyncState(memberState);
     }
 
@@ -179,6 +181,12 @@ public class TimedMemberStateFactory {
         final HotRestartStateImpl state = new HotRestartStateImpl(
                 instance.node.getNodeExtension().getHotRestartService().getBackupTaskStatus());
         memberState.setHotRestartState(state);
+    }
+
+    private void createClusterHotRestarStatus(MemberStateImpl memberState) {
+        final ClusterHotRestartStatusDTO state =
+                instance.node.getNodeExtension().getInternalHotRestartService().getCurrentClusterHotRestartStatus();
+        memberState.setClusterHotRestartStatus(state);
     }
 
     private void createNodeState(MemberStateImpl memberState) {
