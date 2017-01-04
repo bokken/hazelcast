@@ -73,7 +73,6 @@ import com.hazelcast.util.ConcurrencyUtil;
 import com.hazelcast.util.ConstructorFunction;
 import com.hazelcast.util.executor.ExecutorType;
 
-import javax.security.auth.login.LoginException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,6 +85,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.security.auth.login.LoginException;
 
 import static com.hazelcast.spi.impl.OperationResponseHandlerFactory.createEmptyResponseHandler;
 
