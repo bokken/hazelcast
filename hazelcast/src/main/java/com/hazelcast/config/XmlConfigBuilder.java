@@ -24,6 +24,7 @@ import com.hazelcast.config.DistributedClassloadingConfig.ClassCacheMode;
 import com.hazelcast.config.DistributedClassloadingConfig.ProviderMode;
 import com.hazelcast.config.EvictionConfig.MaxSizePolicy;
 import com.hazelcast.config.LoginModuleConfig.LoginModuleUsage;
+import com.hazelcast.config.MapStoreConfig.InitialLoadMode;
 import com.hazelcast.config.PartitionGroupConfig.MemberGroupType;
 import com.hazelcast.config.PermissionConfig.PermissionType;
 import com.hazelcast.core.HazelcastException;
@@ -37,13 +38,12 @@ import com.hazelcast.quorum.QuorumType;
 import com.hazelcast.spi.ServiceConfigurationParser;
 import com.hazelcast.topic.TopicOverloadPolicy;
 import com.hazelcast.util.ExceptionUtil;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,7 +59,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.hazelcast.config.MapStoreConfig.InitialLoadMode;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import static com.hazelcast.config.XmlElements.CACHE;
 import static com.hazelcast.config.XmlElements.DISTRIBUTED_CLASSLOADING;
 import static com.hazelcast.config.XmlElements.DURABLE_EXECUTOR_SERVICE;
@@ -1210,6 +1212,8 @@ public class XmlConfigBuilder extends AbstractConfigBuilder implements ConfigBui
                 } catch (Exception e) {
                     throw ExceptionUtil.rethrow(e);
                 }
+            } else if ("force-defensive-copy".equals(nodeName)) {
+        	mapConfig.setForceDefensiveCopy(!"false".equalsIgnoreCase(value));
             }
         }
         this.config.addMapConfig(mapConfig);
