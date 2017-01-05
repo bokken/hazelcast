@@ -16,26 +16,6 @@
 
 package com.hazelcast.internal.cluster.impl;
 
-import static com.hazelcast.cluster.memberselector.MemberSelectors.NON_LOCAL_MEMBER_SELECTOR;
-import static com.hazelcast.util.Preconditions.checkNotNull;
-import static java.lang.String.format;
-import static java.util.Collections.unmodifiableSet;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import com.hazelcast.cluster.ClusterState;
 import com.hazelcast.cluster.MemberAttributeOperationType;
 import com.hazelcast.core.InitialMembershipEvent;
@@ -83,6 +63,26 @@ import com.hazelcast.transaction.impl.Transaction;
 import com.hazelcast.util.SetUtil;
 import com.hazelcast.util.executor.ExecutorType;
 import com.hazelcast.version.ClusterVersion;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static com.hazelcast.cluster.memberselector.MemberSelectors.NON_LOCAL_MEMBER_SELECTOR;
+import static com.hazelcast.util.Preconditions.checkNotNull;
+import static java.lang.String.format;
+import static java.util.Collections.unmodifiableSet;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 

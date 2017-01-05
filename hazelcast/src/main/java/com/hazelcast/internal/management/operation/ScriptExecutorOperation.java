@@ -16,6 +16,12 @@
 
 package com.hazelcast.internal.management.operation;
 
+import com.hazelcast.internal.management.ManagementDataSerializerHook;
+import com.hazelcast.internal.management.ScriptEngineManagerContext;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.util.MapUtil;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -23,12 +29,6 @@ import java.util.Set;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-
-import com.hazelcast.internal.management.ManagementDataSerializerHook;
-import com.hazelcast.internal.management.ScriptEngineManagerContext;
-import com.hazelcast.nio.ObjectDataInput;
-import com.hazelcast.nio.ObjectDataOutput;
-import com.hazelcast.util.MapUtil;
 
 /**
  *  Operation to execute script on the node.

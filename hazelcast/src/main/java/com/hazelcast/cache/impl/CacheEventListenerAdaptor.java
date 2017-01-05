@@ -16,6 +16,16 @@
 
 package com.hazelcast.cache.impl;
 
+import com.hazelcast.cache.ICache;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceAware;
+import com.hazelcast.nio.serialization.Data;
+import com.hazelcast.spi.EventRegistration;
+import com.hazelcast.spi.ListenerWrapperEventFilter;
+import com.hazelcast.spi.NotifiableEventListener;
+import com.hazelcast.spi.serialization.SerializationService;
+import com.hazelcast.util.SetUtil;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
@@ -30,16 +40,6 @@ import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.event.EventType;
-
-import com.hazelcast.cache.ICache;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.HazelcastInstanceAware;
-import com.hazelcast.nio.serialization.Data;
-import com.hazelcast.spi.EventRegistration;
-import com.hazelcast.spi.ListenerWrapperEventFilter;
-import com.hazelcast.spi.NotifiableEventListener;
-import com.hazelcast.spi.serialization.SerializationService;
-import com.hazelcast.util.SetUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 

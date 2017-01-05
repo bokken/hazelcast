@@ -16,18 +16,18 @@
 
 package com.hazelcast.internal.management.dto;
 
-import static com.hazelcast.config.HotRestartClusterDataRecoveryPolicy.FULL_RECOVERY_ONLY;
-import static com.hazelcast.util.Preconditions.isNotNull;
-
-import java.util.Collections;
-import java.util.Map;
-
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.hazelcast.config.HotRestartClusterDataRecoveryPolicy;
 import com.hazelcast.internal.management.JsonSerializable;
 import com.hazelcast.util.MapUtil;
+
+import java.util.Collections;
+import java.util.Map;
+
+import static com.hazelcast.config.HotRestartClusterDataRecoveryPolicy.FULL_RECOVERY_ONLY;
+import static com.hazelcast.util.Preconditions.isNotNull;
 
 /**
  * A DTO for Hot Restart status of cluster and all members.

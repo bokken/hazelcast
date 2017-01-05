@@ -16,7 +16,17 @@
 
 package com.hazelcast.cache.impl;
 
-import static com.hazelcast.util.Preconditions.checkNotNull;
+import com.hazelcast.cache.CacheUtil;
+import com.hazelcast.cache.HazelcastCacheManager;
+import com.hazelcast.cache.ICache;
+import com.hazelcast.config.CacheConfig;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.hazelcast.core.LifecycleEvent;
+import com.hazelcast.core.LifecycleListener;
+import com.hazelcast.core.LifecycleService;
+import com.hazelcast.util.EmptyStatement;
+import com.hazelcast.util.SetUtil;
 
 import java.lang.ref.WeakReference;
 import java.net.URI;
@@ -36,17 +46,7 @@ import javax.cache.configuration.CompleteConfiguration;
 import javax.cache.configuration.Configuration;
 import javax.cache.spi.CachingProvider;
 
-import com.hazelcast.cache.CacheUtil;
-import com.hazelcast.cache.HazelcastCacheManager;
-import com.hazelcast.cache.ICache;
-import com.hazelcast.config.CacheConfig;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.LifecycleEvent;
-import com.hazelcast.core.LifecycleListener;
-import com.hazelcast.core.LifecycleService;
-import com.hazelcast.util.EmptyStatement;
-import com.hazelcast.util.SetUtil;
+import static com.hazelcast.util.Preconditions.checkNotNull;
 
 /**
  * <p>

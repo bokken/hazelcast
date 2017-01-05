@@ -16,10 +16,6 @@
 
 package com.hazelcast.multimap.impl;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Future;
-
 import com.hazelcast.concurrent.lock.LockProxySupport;
 import com.hazelcast.concurrent.lock.LockServiceImpl;
 import com.hazelcast.config.MultiMapConfig;
@@ -40,6 +36,10 @@ import com.hazelcast.spi.Operation;
 import com.hazelcast.util.ExceptionUtil;
 import com.hazelcast.util.SetUtil;
 import com.hazelcast.util.ThreadUtil;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
 
 public abstract class MultiMapProxySupport extends AbstractDistributedObject<MultiMapService> {
 

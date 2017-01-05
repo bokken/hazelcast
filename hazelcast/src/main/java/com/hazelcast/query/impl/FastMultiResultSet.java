@@ -16,15 +16,15 @@
 
 package com.hazelcast.query.impl;
 
+import com.hazelcast.nio.serialization.Data;
+import com.hazelcast.util.SetUtil;
+
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-
-import com.hazelcast.nio.serialization.Data;
-import com.hazelcast.util.SetUtil;
 
 /**
  * Multiple result set for Predicates.

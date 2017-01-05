@@ -16,18 +16,18 @@
 
 package com.hazelcast.internal.cluster.impl.operations;
 
-import static java.util.Collections.unmodifiableSet;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
-
 import com.hazelcast.hotrestart.InternalHotRestartService;
 import com.hazelcast.internal.cluster.impl.ClusterDataSerializerHook;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.spi.impl.NodeEngineImpl;
 import com.hazelcast.util.SetUtil;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
+
+import static java.util.Collections.unmodifiableSet;
 
 /**
  * Sends excluded member uuids to a member which is in that set.

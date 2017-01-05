@@ -16,11 +16,11 @@
 
 package com.hazelcast.memory;
 
+import com.hazelcast.util.SetUtil;
+
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Set;
-
-import com.hazelcast.util.SetUtil;
 
 /**
  * Used to gather garbage collection statistics.
