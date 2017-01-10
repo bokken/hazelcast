@@ -1,12 +1,30 @@
+/*
+ * Copyright (c) 2008-2016, Hazelcast, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.hazelcast.map;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.nio.serialization.Data;
 import com.hazelcast.query.PartitionPredicate;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.query.TruePredicate;
 import com.hazelcast.spi.properties.GroupProperty;
+import com.hazelcast.spi.serialization.SerializationService;
 import com.hazelcast.test.HazelcastParallelClassRunner;
 import com.hazelcast.test.HazelcastTestSupport;
 import com.hazelcast.test.TestHazelcastInstanceFactory;
@@ -39,7 +57,7 @@ public class PartitionPredicateTest extends HazelcastTestSupport {
     private Predicate<String, Integer> predicate;
 
     @Before
-    public void setup() {
+    public void setUp() {
         Config config = getConfig()
                 .setProperty(GroupProperty.PARTITION_COUNT.getName(), "" + PARTITIONS);
 
@@ -84,10 +102,10 @@ public class PartitionPredicateTest extends HazelcastTestSupport {
 
     @Test
     public void entries() {
-        Collection<Map.Entry<String,Integer>> entries = map.entrySet(predicate);
+        Collection<Map.Entry<String, Integer>> entries = map.entrySet(predicate);
 
         assertEquals(ITEMS_PER_PARTITION, entries.size());
-        for (Map.Entry<String,Integer> entry : entries) {
+        for (Map.Entry<String, Integer> entry : entries) {
             assertEquals(partitionId, local.getPartitionService().getPartition(entry.getKey()).getPartitionId());
             assertEquals(partitionId, entry.getValue().intValue());
         }
@@ -102,5 +120,15 @@ public class PartitionPredicateTest extends HazelcastTestSupport {
     public void testToString() {
         assertTrue(predicate.toString().contains("PartitionPredicate"));
         assertTrue(predicate.toString().contains("partitionKey=" + partitionKey));
+    }
+
+    @Test
+    public void testSerialization() {
+        SerializationService serializationService = getSerializationService(local);
+        Data serialized = serializationService.toData(predicate);
+        PartitionPredicate deserialized = serializationService.toObject(serialized);
+
+        assertEquals(partitionKey, deserialized.getPartitionKey());
+        assertEquals(TruePredicate.INSTANCE, deserialized.getTarget());
     }
 }
